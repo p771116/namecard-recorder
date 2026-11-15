@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>名片聯絡資料｜單機版</title>
+  <style>
+    :root{--ink:#10243e;--muted:#617188;--line:#d9e2ec;--blue:#205b8f;--blue2:#e9f3fb;--paper:#f6f8fb;--white:#fff;--amber:#fff6dc}
+    *{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Microsoft JhengHei",Arial,sans-serif}
+    .shell{max-width:1680px;margin:0 auto;padding:28px 28px 48px}.eyebrow{font-size:12px;letter-spacing:.16em;color:var(--blue);font-weight:700}.title{font-size:clamp(28px,3vw,44px);line-height:1.1;margin:8px 0 8px;letter-spacing:-.03em}.sub{color:var(--muted);margin:0 0 24px}
+    .top{display:flex;justify-content:space-between;gap:24px;align-items:end}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}.btn:hover{border-color:var(--blue);color:var(--blue)}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.danger{color:#9a4b20}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 18px}.stat{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:16px 18px}.stat small{color:var(--muted);display:block;margin-bottom:4px}.stat strong{font-size:25px}
+    .panel{background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(22,48,77,.05);overflow:hidden}.toolbar{display:grid;grid-template-columns:minmax(240px,1.6fr) minmax(160px,.65fr) minmax(160px,.65fr) auto;gap:10px;padding:16px;border-bottom:1px solid var(--line);background:#fbfcfe}.field{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 12px;background:#fff;color:var(--ink);font:inherit}.hint{padding:0 16px 12px;color:var(--muted);font-size:12px}
+    .table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:1460px;font-size:13px}thead{background:var(--blue);color:#fff;position:sticky;top:0;z-index:1}th{padding:13px 11px;text-align:left;white-space:nowrap;font-size:12px;letter-spacing:.03em}td{padding:12px 11px;border-bottom:1px solid #edf1f5;vertical-align:top;line-height:1.5}tbody tr:nth-child(even){background:#fbfdff}tbody tr:hover{background:var(--blue2)}td[contenteditable="true"]{outline:none;cursor:text}td[contenteditable="true"]:focus{background:var(--amber);box-shadow:inset 0 0 0 2px #e6bd54;border-radius:4px}.date{white-space:nowrap}.muted{color:#91a0b1}.note{max-width:280px}.empty{padding:40px;text-align:center;color:var(--muted)}
+    .footer{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-top:14px;color:var(--muted);font-size:12px}.status{color:var(--blue);font-weight:700}.toast{position:fixed;right:24px;bottom:24px;background:var(--ink);color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 8px 24px #0002;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:none}
+    @media(max-width:900px){.shell{padding:20px 14px 36px}.top{display:block}.actions{margin-top:16px}.stats{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr 1fr}.toolbar .search{grid-column:1/-1}.footer{display:block}.footer span{display:block;margin-top:6px}}
+    @media print{body{background:#fff}.shell{max-width:none;padding:0}.actions,.toolbar,.hint,.footer,.toast{display:none}.panel{border:0;box-shadow:none}table{min-width:0;font-size:9px}th,td{padding:5px}.title{font-size:22px}.sub{font-size:10px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="top"><div><div class="eyebrow">OFFLINE CONTACT ARCHIVE</div><h1 class="title">名片聯絡資料</h1><p class="sub">單機版名片歸檔工具 · 可搜尋、篩選、編輯並匯出 CSV</p></div><div class="actions"><button class="btn primary" id="exportBtn">匯出 CSV</button><button class="btn" id="printBtn">列印</button><button class="btn danger" id="resetBtn">還原原始資料</button></div></div>
+    <section class="stats"><div class="stat"><small>目前顯示</small><strong id="countStat">9</strong> 筆</div><div class="stat"><small>有手機資料</small><strong id="mobileStat">0</strong> 筆</div><div class="stat"><small>有手寫備註</small><strong id="noteStat">0</strong> 筆</div></section>
+    <section class="panel">
+      <div class="toolbar"><input class="field search" id="search" placeholder="搜尋姓名、職位、單位、電話、地址或 E-mail…"><select class="field" id="dateFilter"><option value="">全部日期</option></select><select class="field" id="unitFilter"><option value="">全部單位</option></select><button class="btn" id="clearBtn">清除篩選</button></div>
+      <div class="hint">提示：表格文字可直接點擊修改，修改內容會暫存在此瀏覽器；若要保存成檔案，請按「匯出 CSV」。</div>
+      <div class="table-wrap"><table><thead><tr><th>紀錄日期</th><th>名片主人名稱</th><th>職位</th><th>名片代表的單位</th><th>聯絡市話</th><th>聯絡手機</th><th>聯絡地址</th><th>聯絡 E-mail</th><th>手寫備註紀錄</th><th>來源檔案</th></tr></thead><tbody id="body"></tbody></table><div class="empty" id="empty" hidden>沒有符合條件的資料</div></div>
+    </section>
+    <div class="footer"><span>資料筆數：9 張名片</span><span class="status" id="status">已載入原始資料</span></div>
+  </main><div class="toast" id="toast"></div>
+  <script>
+    const original = [
+      {date:'2026-05-11',name:'陳紀妍',position:'業務主任',unit:'南山人壽保險股份有限公司（竹中通訊處）',landline:'03-5311107',mobile:'0925-158-568',address:'30054新竹市東大路二段110號5樓之2',email:'don789g@yahoo.com.tw',note:'右上有手寫字樣，辨識不清，請人工確認',source:'Scan20260511_183043(1).jpg'},
+      {date:'2026-05-11',name:'吳文忠（肖丞）',position:'副處長',unit:'台灣自來水公司第二區管理處',landline:'(03)464-3131#202',mobile:'0912-223257',address:'324桃園市平鎮區水廠路150號',email:'h485@mail.water.gov.tw',note:'',source:'Scan20260511_183043(2).jpg'},
+      {date:'2026-05-11',name:'謝欣雄',position:'資深廠務經理',unit:'KoMiCo Technology Taiwan Ltd（管理部）',landline:'03-597-2988 分機123',mobile:'0933-976-646',address:'303新竹縣湖口鄉實踐路14號',email:'Jason.Hsieh@komico.com',note:'',source:'Scan20260511_183043(3).jpg'},
+      {date:'2026-05-11',name:'莫榮堂（Kung, Jung-Tang）',position:'體育長（Professor & Director）',unit:'國立體育大學',landline:'886-3-3283201 ext.5005',mobile:'0921-336730',address:'333325桃園市龜山區文化一路250號',email:'kung@ntsu.edu.tw',note:'',source:'Scan20260511_183043(5).jpg'},
+      {date:'2026-05-11',name:'未辨識',position:'',unit:'九福建築師事務所（Joe Fu Architecture）',landline:'05-5328108',mobile:'',address:'雲林縣斗六市成功路569號',email:'joefu.archi@gmail.com',note:'名片上未見明確姓名',source:'Scan20260512_102051(1).jpg'},
+      {date:'2026-05-12',name:'江堅龍',position:'',unit:'江堅龍建築師事務所（Architect & Associate）',landline:'(02)8797-3567#2539',mobile:'',address:'台北市內湖區陽光街323號1樓',email:'clc25@ceci.com.tw',note:'',source:'Scan20260512_102051(2).jpg'},
+      {date:'2026-05-12',name:'蔡仁毅',position:'鑑定委員會主任委員；建築師事務所負責人',unit:'福建金門馬祖地區建築師公會；蔡仁毅建築師事務所',landline:'(082)328-712；(02)2345-8707',mobile:'0937-911-858',address:'89350金門縣金城鎮民權路226巷4弄22號4樓；110台北市信義區和平東路3段323號7樓',email:'jybear.tsai@msa.hinet.net',note:'',source:'Scan20260512_102051(3).jpg'},
+      {date:'2026-05-12',name:'俞翰蒼',position:'一級專員',unit:'註力實業股份有限公司',landline:'(02)2726-8558',mobile:'0972-061-551',address:'110台北市信義區松德路161號11樓之1',email:'ji3945u3@chuanli.com.tw',note:'手寫內容疑似「楊國慶友」，原字樣請人工確認',source:'Scan20260512_102051(4).jpg'},
+      {date:'2026-05-12',name:'鄭子傑',position:'副總經理',unit:'傳真機構（Virtuosi Real Estate）',landline:'+886 2 2777-1288',mobile:'+886 931 393 717',address:'台北市市民大道四段100號15樓',email:'chengtzuchieh@gmail.com',note:'手寫內容辨識不清，請人工確認',source:'Scan20260512_102051(5).jpg'}
+    ];
+    const key='namecardArchiveV1'; let data=JSON.parse(localStorage.getItem(key)||'null')||structuredClone(original); const $=id=>document.getElementById(id); const fields=['date','name','position','unit','landline','mobile','address','email','note','source'];
+    function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+    function populateFilters(){const dates=[...new Set(data.map(x=>x.date))].sort();const units=[...new Set(data.map(x=>x.unit))].sort();$('dateFilter').innerHTML='<option value="">全部日期</option>'+dates.map(x=>`<option>${esc(x)}</option>`).join('');$('unitFilter').innerHTML='<option value="">全部單位</option>'+units.map(x=>`<option>${esc(x)}</option>`).join('')}
+    function render(){const q=$('search').value.trim().toLowerCase(), date=$('dateFilter').value, unit=$('unitFilter').value;const rows=data.map((x,i)=>({...x,_i:i})).filter(x=>(!date||x.date===date)&&(!unit||x.unit===unit)&&(!q||fields.some(f=>String(x[f]).toLowerCase().includes(q))));$('body').innerHTML=rows.map(x=>`<tr>${fields.map(f=>`<td class="${f==='date'?'date':''} ${f==='note'?'note':''}" contenteditable="true" data-i="${x._i}" data-f="${f}">${esc(x[f])||'<span class="muted">—</span>'}</td>`).join('')}</tr>`).join('');$('empty').hidden=rows.length>0;$('countStat').textContent=rows.length;$('mobileStat').textContent=rows.filter(x=>x.mobile).length;$('noteStat').textContent=rows.filter(x=>x.note).length;document.querySelectorAll('[contenteditable]').forEach(el=>el.addEventListener('blur',saveCell));}
+    function saveCell(e){const el=e.currentTarget;data[+el.dataset.i][el.dataset.f]=el.textContent.trim().replace(/^—$/,'');localStorage.setItem(key,JSON.stringify(data));$('status').textContent='已儲存本機修改';}
+    function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1800)}
+    function csv(){const headers=['紀錄日期','名片主人名稱','職位','名片代表的單位','聯絡市話','聯絡手機','聯絡地址','聯絡 E-mail','手寫備註紀錄','來源檔案'];const lines=[headers,...data.map(x=>fields.map(f=>x[f]))].map(row=>row.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(','));const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='名片聯絡資料_單機版.csv';a.click();URL.revokeObjectURL(a.href);toast('CSV 已匯出');}
+    $('search').addEventListener('input',render);$('dateFilter').addEventListener('change',render);$('unitFilter').addEventListener('change',render);$('clearBtn').addEventListener('click',()=>{$('search').value='';$('dateFilter').value='';$('unitFilter').value='';render();});$('exportBtn').addEventListener('click',csv);$('printBtn').addEventListener('click',()=>window.print());$('resetBtn').addEventListener('click',()=>{if(confirm('確定要還原成原始名片資料嗎？')){data=structuredClone(original);localStorage.removeItem(key);populateFilters();render();toast('已還原原始資料');}});populateFilters();render();
+  </script>
+</body>
+</html>
